@@ -40,10 +40,11 @@ const gradeExam = async (req, res) => {
             .insert([{
                 exam_id,
                 student_id,
-                submission_image_url: submission_image,  // Matches schema
-                graded_score: gradingResult.score,       // Matches schema
+                submission_image_url: submission_image,
+                graded_score: gradingResult.score || 0,
                 feedback: gradingResult.feedback,
-                status: 'graded',                        // Matches enum
+                question_results: gradingResult.question_results || [], // Save the detailed breakdown
+                status: 'graded',
                 graded_at: new Date().toISOString()
             }])
             .select()

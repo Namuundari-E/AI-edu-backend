@@ -72,6 +72,7 @@ create table exam_submissions (
   submission_image_url text not null,
   graded_score numeric(5,2) check (graded_score >= 0),
   feedback text,
+  question_results jsonb default '[]', -- Added for detailed breakdown
   status submission_status not null default 'pending',
   created_at timestamptz default now(),
   graded_at timestamptz,

@@ -1,24 +1,43 @@
 const supabase = require('../config/supabase');
 const { sendSuccess, sendError } = require('../utils/response');
+const { generateExamWithLLM } = require('../services/llmService');
+
+// Backend: controllers/examController.js
+const generateExam = async (req, res) => {
+    try {
+        const { topic, difficulty } = req.body;
+
+        if (!topic || !difficulty) {
+            return sendError(res, 'Topic and difficulty are required', 400);
+        }
+
+        const examData = await generateExamWithLLM(topic, difficulty);
+        sendSuccess(res, examData);
+
+    } catch (error) {
+        console.error('Exam generation error:', error);
+        sendError(res, 'Failed to generate exam', 500);
+    }
+};
 
 const createExam = async (req, res) => {
     try {
+        // We store core exam metadata and the answer key.
+        // The full questions JSON is currently NOT persisted because the
+        // 'questions' column does not exist in the 'exams' table schema.
         const { name, class_id, total_points, answer_key, exam_date } = req.body;
 
-        if (!name || !class_id || !total_points || !answer_key || !exam_date) {
-            return sendError(res, 'Name, class ID, total points, answer key, and exam date are required', 400);
+        if (!name || !class_id || !answer_key) {
+            return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        // Get teacher_id from teachers table
         const { data: teacher, error: teacherError } = await supabase
             .from('teachers')
             .select('id')
             .eq('user_id', req.userId)
             .single();
 
-        if (teacherError || !teacher) {
-            return sendError(res, 'Teacher not found', 404);
-        }
+        if (teacherError) throw teacherError;
 
         const { data, error } = await supabase
             .from('exams')
@@ -26,6 +45,7 @@ const createExam = async (req, res) => {
                 exam_name: name,
                 class_id,
                 total_points: parseInt(total_points),
+                // Ensure it's stored as a clean JSON object
                 answer_key: typeof answer_key === 'string' ? JSON.parse(answer_key) : answer_key,
                 exam_date,
                 teacher_id: teacher.id
@@ -35,17 +55,10 @@ const createExam = async (req, res) => {
 
         if (error) throw error;
 
-        // Log activity
-        await supabase.from('activity_log').insert([{
-            teacher_id: teacher.id,
-            activity_type: 'CREATE_EXAM',
-            description: `Created exam: ${name}`
-        }]);
-
         sendSuccess(res, data, 'Exam created successfully', 201);
     } catch (error) {
-        console.error('Create exam error:', error);
-        sendError(res, 'Failed to create exam', 500);
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
     }
 };
 
@@ -116,4 +129,4 @@ const getExamById = async (req, res) => {
     }
 };
 
-module.exports = { createExam, getExams, getExamById };
+module.exports = { createExam, getExams, getExamById, generateExam };

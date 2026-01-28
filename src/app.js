@@ -12,16 +12,25 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocs = require('./config/swagger');
 
 const app = express();
+//body parser 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Middleware
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    if (Object.keys(req.body).length > 0) {
+        console.log('Body:', JSON.stringify(req.body, null, 2));
+    }
+    next();
+});
+//cors
 app.use(cors({
     origin: '*', // Allow all origins (configure specific origins in production)
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // Static files for uploaded exams
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
