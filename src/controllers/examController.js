@@ -129,4 +129,34 @@ const getExamById = async (req, res) => {
     }
 };
 
-module.exports = { createExam, getExams, getExamById, generateExam };
+const deleteExam = async (req, res) => {
+    try {
+        const { examId } = req.params;
+
+        // Verify teacher ownership
+        const { data: teacher, error: teacherError } = await supabase
+            .from('teachers')
+            .select('id')
+            .eq('user_id', req.userId)
+            .single();
+
+        if (teacherError || !teacher) {
+            return sendError(res, 'Teacher not found', 404);
+        }
+
+        const { error } = await supabase
+            .from('exams')
+            .delete()
+            .eq('id', examId)
+            .eq('teacher_id', teacher.id);
+
+        if (error) throw error;
+
+        sendSuccess(res, null, 'Exam deleted successfully');
+    } catch (error) {
+        console.error('Delete exam error:', error);
+        sendError(res, 'Failed to delete exam', 500);
+    }
+};
+
+module.exports = { createExam, getExams, getExamById, generateExam, deleteExam };

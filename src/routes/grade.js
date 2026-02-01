@@ -1,5 +1,5 @@
 const express = require('express');
-const { gradeExam, getGrades } = require('../controllers/gradeController');
+const { gradeExam, getGrades, updateGrade } = require('../controllers/gradeController');
 const { verifyToken } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
@@ -45,6 +45,7 @@ const router = express.Router();
  *         description: Server error
  */
 router.post('/', verifyToken, upload.single('submission'), gradeExam);
+
 /**
  * @swagger
  * /grades:
@@ -64,5 +65,7 @@ router.post('/', verifyToken, upload.single('submission'), gradeExam);
  *         description: List of grades
  */
 router.get('/', verifyToken, getGrades);
+
+router.put('/:id', verifyToken, updateGrade);
 
 module.exports = router;

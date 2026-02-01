@@ -1,9 +1,12 @@
 const express = require('express');
-const { createExam, getExams, getExamById } = require('../controllers/examController');
+const { createExam, getExams, getExamById, generateExam, deleteExam } = require('../controllers/examController');
 const { verifyToken } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 const router = express.Router();
+
+router.post('/generate', verifyToken, generateExam);
+router.delete('/:examId', verifyToken, deleteExam);
 
 /**
  * @swagger

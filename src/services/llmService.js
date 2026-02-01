@@ -25,14 +25,17 @@ EXAM DETAILS:
 - Correct Answers/Rubric: ${JSON.stringify(exam.answer_key || exam.questions)}
 
 INSTRUCTIONS:
-1. Carefully analyze the handwritten answers in the image.
-2. The text is in Mongolian language - read it carefully.
-3. Check each answer against the correct solution/rubric provided.
-4. Provide marks for each question.
-5. Give constructive feedback in Mongolian.
+1. Look at the top-right corner of the paper. You will see 3 separate boxes for 'Student Code'.
+2. Identify the 3-digit numeric code written inside those boxes (one digit per box).
+3. Analyze the handwritten answers for each question.
+4. The text is in Mongolian language - read it carefully.
+5. Check each answer against the correct solution/rubric provided.
+6. Provide marks for each question.
+7. Give constructive feedback in Mongolian.
 
 Please respond ONLY with a valid JSON object in this format:
 {
+  "student_code": "3-digit-string (e.g., '852')",
   "score": <total marks obtained>,
   "question_results": [
     {
